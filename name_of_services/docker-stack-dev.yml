@@ -10,9 +10,9 @@ networks:
   name_of network_2:
     external: true # if you wish attack network? without creation new  
 services:
-#################
+#########################
 ### name_of service_1 ###
-#################
+#########################
   name_of service_1:
     image: "" # your image registry
     hostname: name_of service_1 # may differ from name_of service_1
