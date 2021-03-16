@@ -1,0 +1,99 @@
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+# https://docs.docker.com/engine/reference/commandline/service_create/#specify-service-placement-preferences---placement-pref
+version: '3.8' # version of docker-compose
+
+volumes:
+
+networks:
+  name_of network_1:
+    external: true # if you wish attack network? without creation new
+  name_of network_2:
+    external: true # if you wish attack network? without creation new  
+services:
+#################
+### name_of service_1 ###
+#################
+  name_of service_1:
+    image: "" # your image registry
+    hostname: name_of service_1 # may differ from name_of service_1
+    environment:
+      # GENERAL ENV
+      TZ: Europe/Moscow
+      # SERVICE ENV
+  
+    env_file: work with compose only!!! env_file or environment !!!!
+    
+    networks:
+      - name_of network_1
+      - name_of network_2
+    ports:
+      - "8080:8080/tcp" # example
+      - "8443:8443/tcp" # example
+    volumes: # if you have this option
+
+    #### Deploy #### <<< stack option!
+    deploy:
+    #### choose global or replicated ####
+      Endpoint_mode: dnsrr 
+      #mode: global # deploy the service to all hosts
+      mode: replicated # we need replicas from 1 to infinitely
+      replicas: 1 # number of replicas
+      placement: # if you want to deploy the service to specific host(s) [==] - match; [!=] - exclude
+        replicas-max-per-node: 1 # how many replicas per node you can deploy
+        constraints: # 
+          - node.role == worker # by node.role [manager/worker]
+          - node.labels.region == east # by label
+      #### update parametrs #### 
+      # # одновременно обновлять 1 контейнер из группы, с задержкой 10с между обновлениями, сначала гасим старый и запускаем новый   
+      update_config:
+        delay: 15s
+        parallelism: 1
+        monitor: 10s
+        failure_action: rollback
+        max_failure_ratio: 0.55
+      # перезапускать если кондиция: ошибка, с задержкой 30с, максимум 3 раза, задержка перед принятием решения, что все ок 120с
+      restart_policy: # http://progressivecoder.com/docker-compose-restart-policies-to-manage-docker-containers/
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 30s
+      #### resources parametrs ####  
+      resources: 
+        limits: # max resourses for the service 
+          cpus: '0.55'
+          memory: 2G
+        reservations: # evalible resources for the service
+          cpus: '0.35'
+          memory: 1G
+          
+    #### Logiging ####
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+        loki-retries: "5"
+        loki-batch-size: "400"
+        loki-pipeline-stages: |
+          - json:
+              expressions:
+                level: level
+                path: path
+                method: method
+                msg: msg
+          - labels:
+              msg: 
+              level:
+              path:
+              method:
+    healthcheck:
+    #### HealthCheck ####
+      #### for web services ####
+      test: curl --fail -s http://127.0.0.1:3000/ || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      #### postgres service ####
+      # test: ["CMD-SHELL", "pg_isready -U postgres"]
+      # interval: 10s
+      # timeout: 5s
+      # retries: 5
