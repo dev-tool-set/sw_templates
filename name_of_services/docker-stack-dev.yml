@@ -34,7 +34,9 @@ services:
     #### Deploy #### <<< stack option!
     deploy:
     #### choose global or replicated ####
-      Endpoint_mode: dnsrr 
+      Endpoint_mode: dnsrr
+      depends_on:
+        -  
       #mode: global # deploy the service to all hosts
       mode: replicated # we need replicas from 1 to infinitely
       replicas: 1 # number of replicas
@@ -88,12 +90,14 @@ services:
     healthcheck:
     #### HealthCheck ####
       #### for web services ####
-      test: curl --fail -s http://127.0.0.1:3000/ || exit 1
-      interval: 1m30s
+      test: curl --fail -s http://127.0.0.1:port || exit 1
+      interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 1m
       #### postgres service ####
       # test: ["CMD-SHELL", "pg_isready -U postgres"]
-      # interval: 10s
-      # timeout: 5s
-      # retries: 5
+      # interval: 10s # The health check will first run [interval] seconds after the container is started, and then again interval seconds after each previous check completes.
+      # timeout: 5s # If a single run of the check takes longer than timeout seconds then the check is considered to have failed.
+      # retries: 5 # It takes retries consecutive failures of the health check for the container to be considered unhealthy
+      # start_period: 2m
