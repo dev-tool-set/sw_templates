@@ -87,8 +87,8 @@ services:
               level:
               path:
               method:
-    healthcheck:
     #### HealthCheck ####
+    healthcheck:
       #### for web services ####
       test: curl --fail -s http://127.0.0.1:port || exit 1
       interval: 30s
@@ -101,3 +101,9 @@ services:
       # timeout: 5s # If a single run of the check takes longer than timeout seconds then the check is considered to have failed.
       # retries: 5 # It takes retries consecutive failures of the health check for the container to be considered unhealthy
       # start_period: 2m
+      #### traefik ####
+      # test: wget --quiet --tries=1 --spider https://example.service.com/ping || exit 1
+      # interval: 3s
+      # timeout: 1s
+      # retries: 3
+      # start_period: 1s
