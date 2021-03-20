@@ -1,0 +1,21 @@
+# Создаем > тестируем > удаляем > пушим в регистри
+stages:
+  - build
+  - push
+  - clean
+  - deploy
+
+build_job:
+  stage: build
+  script:
+    - docker build -f dev/src/Dockerfile-runner  -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID .
+    - docker build -f dev/src/Dockerfile-docker  -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID .
+
+push_job:
+  stage: push
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  script:
+    - docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
+  only:
+    - develop
