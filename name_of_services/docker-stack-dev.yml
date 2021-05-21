@@ -4,6 +4,10 @@ version: '3.8' # version of docker-compose
 
 volumes:
 
+configs:
+
+secrets:
+
 networks:
   name_of network_1:
     external: true # if you wish attack network? without creation new
@@ -20,6 +24,12 @@ services:
       # GENERAL ENV
       TZ: Europe/Moscow
       # SERVICE ENV
+    
+    labels:
+    
+    configs:
+
+    secrets:
   
     env_file: work with compose only!!! env_file or environment !!!!
     
@@ -41,7 +51,7 @@ services:
       mode: replicated # we need replicas from 1 to infinitely
       replicas: 1 # number of replicas
       placement: # if you want to deploy the service to specific host(s) [==] - match; [!=] - exclude
-        replicas-max-per-node: 1 # how many replicas per node you can deploy
+        max_replicas_per_node: 1 # how many replicas per node you can deploy
         constraints: # 
           - node.role == worker # by node.role [manager/worker]
           - node.labels.region == east # by label
